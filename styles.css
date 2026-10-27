@@ -129,6 +129,7 @@ input { min-width: 0; }
 .position-field .text-input { margin-bottom: 0; }
 .form-error { color: var(--danger); font-size: 12px; line-height: 1.6; margin: 14px 0 0; }
 .form-error:empty { display: none; }
+.icon-error { margin: -10px 0 18px; }
 .modal-actions { display: flex; justify-content: flex-end; align-items: center; gap: 9px; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); }
 .primary-button, .secondary-button { border-radius: 9px; padding: 10px 19px; font-size: 12px; min-height: 38px; }
 .primary-button { background: var(--primary); color: var(--on-emphasis); }

@@ -1,7 +1,7 @@
-import { COLORS, MAX_SHORTCUTS, defaultState, normalizeUrl, searchDestination, moveShortcut } from './lib/model.js?v=1.2.2';
-import { createStorage } from './lib/storage.js?v=1.2.2';
-import { icons } from './lib/icons.js?v=1.2.2';
-import { createWebsiteFavicons } from './lib/favicon-browser.js?v=1.2.2';
+import { COLORS, MAX_SHORTCUTS, defaultState, normalizeUrl, searchDestination, moveShortcut } from './lib/model.js?v=1.3.0';
+import { createStorage } from './lib/storage.js?v=1.3.0';
+import { icons } from './lib/icons.js?v=1.3.0';
+import { createWebsiteFavicons } from './lib/favicon-browser.js?v=1.3.0';
 
 const $ = (selector) => document.querySelector(selector);
 const storage = createStorage();
@@ -62,14 +62,15 @@ function applyAppearance() {
 }
 systemTheme.addEventListener('change', applyAppearance);
 
-function makeIcon(shortcut, loadRemote = true) {
+function makeIcon(shortcut, loadRemote = true, onError = null) {
   const icon = document.createElement('span');
   icon.className = 'shortcut-icon';
   icon.dataset.color = shortcut.color;
   icon.setAttribute('aria-hidden', 'true');
   icon.textContent = [...shortcut.name.trim()][0]?.toUpperCase() || '↗';
-  if (loadRemote && shortcut.url) void favicons.get(shortcut.url).then((found) => {
-    if (!found || !icon.isConnected) return;
+  if (loadRemote && (shortcut.iconUrl || shortcut.url)) void (shortcut.iconUrl ? favicons.getCustom(shortcut.iconUrl) : favicons.get(shortcut.url)).then((found) => {
+    if (!icon.isConnected) return;
+    if (!found) { onError?.(); return; }
     const image = new Image(32, 32);
     image.className = 'website-favicon';
     image.alt = '';
@@ -77,12 +78,15 @@ function makeIcon(shortcut, loadRemote = true) {
     image.referrerPolicy = 'no-referrer';
     image.onload = () => {
       if (!icon.isConnected) return;
-      image.style.maxWidth = `${image.naturalWidth}px`;
-      image.style.maxHeight = `${image.naturalHeight}px`;
+      if (!shortcut.iconUrl) {
+        image.style.maxWidth = `${image.naturalWidth}px`;
+        image.style.maxHeight = `${image.naturalHeight}px`;
+      }
       icon.replaceChildren(image);
       icon.dataset.iconType = found.kind;
       icon.dataset.iconUrl = found.url;
     };
+    image.onerror = () => { if (icon.isConnected) onError?.(); };
     image.src = found.src;
   }).catch(() => {});
   return icon;
@@ -221,12 +225,18 @@ function updatePreview() {
   const value = $('#shortcut-url').value;
   let url = '';
   try { url = normalizeUrl(value); } catch { /* Show a letter while typing an incomplete URL. */ }
-  const shortcut = { name: $('#shortcut-name').value || '↗', url, color: $('#shortcut-form').elements.color.value || 'sage' };
+  let iconUrl = '';
+  try { if ($('#shortcut-icon-url').value.trim()) iconUrl = normalizeUrl($('#shortcut-icon-url').value); } catch { /* Validate incomplete icon URLs on save. */ }
+  $('#shortcut-icon-error').textContent = '';
+  const shortcut = { name: $('#shortcut-name').value || '↗', url, iconUrl, color: $('#shortcut-form').elements.color.value || 'sage' };
   $('#shortcut-preview').replaceChildren(makeIcon(shortcut, false));
-  if (url) previewTimer = setTimeout(() => $('#shortcut-preview').replaceChildren(makeIcon(shortcut)), 350);
+  if (url || iconUrl) previewTimer = setTimeout(() => $('#shortcut-preview').replaceChildren(makeIcon(shortcut, true, () => {
+    if (iconUrl) $('#shortcut-icon-error').textContent = '无法加载图标，请检查图片 URL';
+  })), 350);
 }
 $('#shortcut-name').addEventListener('input', updatePreview);
 $('#shortcut-url').addEventListener('input', () => { $('#shortcut-url').removeAttribute('aria-invalid'); $('#shortcut-error').textContent = ''; updatePreview(); });
+$('#shortcut-icon-url').addEventListener('input', () => { $('#shortcut-icon-url').removeAttribute('aria-invalid'); updatePreview(); });
 $('#shortcut-colors').addEventListener('change', updatePreview);
 $('#shortcut-dialog').addEventListener('close', () => clearTimeout(previewTimer));
 
@@ -238,12 +248,14 @@ function openShortcut(id = null) {
   $('#shortcut-form').reset();
   $('#shortcut-name').removeAttribute('aria-invalid');
   $('#shortcut-url').removeAttribute('aria-invalid');
+  $('#shortcut-icon-url').removeAttribute('aria-invalid');
   $('#shortcut-error').textContent = '';
   $('#shortcut-dialog-title').textContent = id ? '编辑快捷方式' : '添加快捷方式';
   $('#save-shortcut').textContent = id ? '保存' : '添加';
   $('#delete-shortcut').hidden = !id;
   $('#shortcut-name').value = shortcut?.name || '';
   $('#shortcut-url').value = shortcut?.url || '';
+  $('#shortcut-icon-url').value = shortcut?.iconUrl || '';
   $('#shortcut-form').elements.color.value = shortcut?.color || 'sage';
   $('#position-field').hidden = !id;
   $('#shortcut-position').replaceChildren();
@@ -277,7 +289,15 @@ $('#shortcut-form').addEventListener('submit', async (event) => {
     return;
   }
   const id = editingId;
-  const shortcut = { id: id || crypto.randomUUID(), name, url, color: $('#shortcut-form').elements.color.value };
+  let iconUrl = '';
+  try { if ($('#shortcut-icon-url').value.trim()) iconUrl = normalizeUrl($('#shortcut-icon-url').value); }
+  catch {
+    $('#shortcut-icon-error').textContent = '请输入有效的图片 URL，或留空自动获取';
+    $('#shortcut-icon-url').setAttribute('aria-invalid', 'true');
+    $('#shortcut-icon-url').focus();
+    return;
+  }
+  const shortcut = { id: id || crypto.randomUUID(), name, url, color: $('#shortcut-form').elements.color.value, ...(iconUrl ? { iconUrl } : {}) };
   const position = Number($('#shortcut-position').value);
   $('#save-shortcut').disabled = true;
   try {

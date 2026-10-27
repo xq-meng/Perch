@@ -170,3 +170,61 @@ test('icon cache serializes writes, persists independently, and rejects maliciou
   await cache.put('https://example.com', { ...entry, icon: { ...savedIcon, src: 'javascript:alert(1)' } });
   assert.equal(await cache.get('https://example.com'), null);
 });
+
+test('custom icons fetch the exact image URL without reading the website homepage', async () => {
+  const requested = [];
+  const options = defaults();
+  options.fetchPage = async () => { assert.fail('Custom icons must not request a homepage'); };
+  options.loadIcon = async (url, origin) => { requested.push({ url, origin }); return { src, width: 96, height: 96 }; };
+  const url = 'https://images.example.com/custom/logo.png?size=144';
+  const service = createFaviconService(options);
+  const first = service.getCustom(url);
+  assert.equal(first, service.getCustom(url));
+  const icon = await first;
+  assert.deepEqual(requested, [{ url, origin: 'https://images.example.com' }]);
+  assert.equal(icon.kind, 'custom');
+  assert.equal(icon.url, url);
+  assert.deepEqual(options.cache.entries.get(url).icon, icon);
+});
+
+test('custom images from the same host have separate caches and do not replace the site favicon', async () => {
+  const cache = memoryCache();
+  const service = createFaviconService({ ...defaults(), cache });
+  const first = await service.getCustom('https://example.com/one.png');
+  const second = await service.getCustom('https://example.com/two.png');
+  const automatic = await service.get('https://example.com/');
+  assert.notEqual(first.url, second.url);
+  assert.equal(cache.entries.get(first.url).icon.kind, 'custom');
+  assert.equal(cache.entries.get(second.url).icon.kind, 'custom');
+  assert.equal(cache.entries.get('https://example.com').icon.kind, automatic.kind);
+  assert.notEqual(automatic.kind, 'custom');
+});
+
+test('cached custom icons bypass the network and remain visible offline', async () => {
+  const url = 'https://example.com/custom.png';
+  const custom = { ...savedIcon, url, kind: 'custom' };
+  const cache = memoryCache({ [url]: { icon: custom, updatedAt: 1000 } });
+  let requests = 0;
+  const options = { ...defaults(), cache, now: () => 2000, loadIcon: async () => { requests++; throw new Error('offline'); } };
+  assert.deepEqual(await createFaviconService(options).getCustom(url), custom);
+  assert.equal(requests, 0);
+  options.now = () => ICON_TTL + 2000;
+  assert.deepEqual(await createFaviconService(options).getCustom(url), custom);
+  assert.equal(requests, 1);
+  for (const unsafe of ['javascript:alert(1)', 'file:///tmp/icon.png', 'https://user:password@example.com/']) {
+    assert.equal(await createFaviconService(options).getCustom(unsafe), null);
+  }
+  assert.equal(requests, 1);
+});
+
+test('custom image caches persist by full URL and reject mismatched sources', async () => {
+  const values = new Map();
+  const env = { localStorage: { getItem: key => values.get(key), setItem: (key, value) => values.set(key, value) } };
+  const cache = createIconCache(env);
+  const url = 'https://images.example.com/a.png';
+  const entry = { icon: { ...savedIcon, url, kind: 'custom' }, updatedAt: Date.now() };
+  await cache.put(url, entry);
+  assert.deepEqual(await createIconCache(env).get(url), entry);
+  await cache.put('https://images.example.com/b.png', entry);
+  assert.equal(await cache.get('https://images.example.com/b.png'), null);
+});

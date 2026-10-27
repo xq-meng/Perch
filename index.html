@@ -9,8 +9,8 @@
     <title>Perch</title>
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="128x128" href="assets/icon-128.png" />
-    <link rel="stylesheet" href="styles.css?v=1.2.2" />
-    <script type="module" src="app.js?v=1.2.2"></script>
+    <link rel="stylesheet" href="styles.css?v=1.3.0" />
+    <script type="module" src="app.js?v=1.3.0"></script>
   </head>
   <body>
     <main class="main-content">
@@ -55,6 +55,9 @@
         <input id="shortcut-name" class="text-input" name="name" placeholder="例如：我的灵感库" maxlength="32" required autocomplete="off" />
         <label class="field-label" for="shortcut-url">网址</label>
         <input id="shortcut-url" class="text-input" name="url" placeholder="https://example.com" maxlength="2048" required autocomplete="off" inputmode="url" spellcheck="false" aria-describedby="shortcut-error" />
+        <label class="field-label" for="shortcut-icon-url">图标 URL（可选）</label>
+        <input id="shortcut-icon-url" class="text-input" name="iconUrl" placeholder="留空则自动获取网站图标" maxlength="2048" autocomplete="off" inputmode="url" spellcheck="false" aria-describedby="shortcut-icon-error" />
+        <p id="shortcut-icon-error" class="form-error icon-error" role="status"></p>
         <fieldset class="color-field"><legend class="field-label">图标底色</legend><div id="shortcut-colors" class="color-options"></div></fieldset>
         <div id="position-field" class="position-field" hidden><label class="field-label" for="shortcut-position">排列位置</label><select id="shortcut-position" class="text-input"></select></div>
         <p id="shortcut-error" class="form-error" role="alert"></p>

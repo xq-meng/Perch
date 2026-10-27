@@ -52,6 +52,23 @@ test('reordering supports both directions without mutating the original', () => 
   assert.deepEqual(list.map(item => item.id), ['a', 'b', 'c']);
 });
 
+test('custom icon URLs survive normalization and can be cleared to restore automatic discovery', () => {
+  const shortcut = { ...defaultState().shortcuts[0], iconUrl: ' images.example.com/logo.png?size=144#icon ' };
+  const saved = normalizeState({ shortcuts: [shortcut] }).shortcuts[0];
+  assert.equal(saved.iconUrl, 'https://images.example.com/logo.png?size=144#icon');
+  assert.equal(Object.hasOwn(normalizeState({ shortcuts: [{ ...saved, iconUrl: '' }] }).shortcuts[0], 'iconUrl'), false);
+  assert.deepEqual(normalizeState(defaultState()), defaultState());
+});
+
+test('unsafe stored icon URLs are discarded without losing the shortcut', () => {
+  for (const iconUrl of ['javascript:alert(1)', 'data:image/svg+xml,test', 'file:///tmp/icon.png', 'https://user:password@example.com/icon.png']) {
+    const shortcut = { ...defaultState().shortcuts[0], iconUrl };
+    const saved = normalizeState({ shortcuts: [shortcut] }).shortcuts[0];
+    assert.equal(saved.id, shortcut.id);
+    assert.equal(Object.hasOwn(saved, 'iconUrl'), false);
+  }
+});
+
 test('browser preview persists data and receives storage events', async () => {
   const values = new Map();
   const listeners = new Map();
@@ -85,6 +102,7 @@ test('extension uses chrome.storage.local and synchronizes only its own key', as
   const storage = createStorage(env);
   const saved = defaultState();
   saved.settings.theme = 'dark';
+  saved.shortcuts[0].iconUrl = 'https://images.example.com/custom.png';
   await storage.write(saved);
   assert.deepEqual(await storage.read(), saved);
   let received;

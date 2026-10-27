@@ -17,6 +17,7 @@ Perch 是一个轻量、无构建依赖的 Chrome 新标签页扩展。中文界
 
 - 搜索框支持 Google、Bing、百度和 DuckDuckGo，也可以直接输入网址。空白处按 `/` 聚焦搜索框（Chrome 新标签页最初会把焦点放在地址栏，需先切换到页面）。
 - 点击快捷方式区域右上角的「+」，填写名称、网址、图标底色。图标优先使用网站提供的 Apple Touch Icon，其次使用网站 favicon，获取失败时显示名称首字符。
+- 添加或编辑快捷方式时，可填写「图标 URL」使用指定的 HTTP/HTTPS 图片，并查看预览。留空后恢复自动获取网站图标；自定义地址和图片缓存均保存在当前浏览器中。
 - 点击铅笔图标进入整理模式，可以点击快捷方式编辑或拖动排序，点击对勾图标退出。编辑窗口的「排列位置」也支持键盘操作。
 - 删除后可在 10 秒内撤销。最多保存 48 个快捷方式。
 - 页面采用参考 [GitHub Primer](https://primer.style/product/primitives/color/) 的中性灰、蓝色交互色和绿色主按钮配色。
@@ -42,7 +43,7 @@ python3 scripts/preview.py
 
 ## 打包
 
-在完整源代码目录运行 `python3 scripts/package.py`，生成 `artifacts/perch-1.2.2.zip`。归档包含扩展运行资源、本机预览脚本和说明，不含测试及预览截图。解压到独立文件夹后，按上述步骤加载其中的扩展。
+在完整源代码目录运行 `python3 scripts/package.py`，生成 `artifacts/perch-1.3.0.zip`。归档包含扩展运行资源、本机预览脚本和说明，不含测试及预览截图。解压到独立文件夹后，按上述步骤加载其中的扩展。
 
 ## 测试
 
@@ -52,6 +53,6 @@ python3 scripts/preview.py
 
 申请 `storage` 权限保存设置与图标缓存，并申请 HTTP/HTTPS 网站访问权限以读取用户添加的网站及其图标 CDN。Chrome 在加载或更新时可能提示这一权限。没有内容脚本，不读取浏览记录或书签，不包含分析统计、远程脚本、外部字体或后台服务。可选的本机预览脚本只服务本机同源请求，禁止读取私网地址，不向网站转发浏览器 Cookie。
 
-正式扩展仅请求站点首页和图标，请求使用 `credentials: 'omit'` 与 `referrerPolicy: 'no-referrer'`，不携带登录 Cookie 或快捷方式中的路径、查询参数、片段。远程 HTML 仅在未挂载的惰性模板中解析图标链接，不执行其中的脚本。搜索内容仅在提交后发送至所选搜索引擎。
+自动获取图标时，正式扩展仅请求站点首页和图标，请求使用 `credentials: 'omit'` 与 `referrerPolicy: 'no-referrer'`，不携带登录 Cookie 或快捷方式中的路径、查询参数、片段。远程 HTML 仅在未挂载的惰性模板中解析图标链接，不执行其中的脚本。自定义图标会按填写的完整图片 URL 请求，同样不携带登录 Cookie。搜索内容仅在提交后发送至所选搜索引擎。
 
 采用 Manifest V3 的 `chrome_url_overrides.newtab` 替换新标签页，参见 [Chrome 官方文档](https://developer.chrome.com/docs/extensions/develop/ui/override-chrome-pages)。

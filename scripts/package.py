@@ -18,7 +18,7 @@ files = [
 for file in files:
     if not file.is_file():
         raise FileNotFoundError(file)
-output = root / "artifacts" / f"qipage-{manifest['version']}.zip"
+output = root / "artifacts" / f"perch-{manifest['version']}.zip"
 output.parent.mkdir(exist_ok=True)
 with ZipFile(output, "w", ZIP_DEFLATED) as archive:
     for file in files:

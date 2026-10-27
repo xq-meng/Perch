@@ -1,12 +1,14 @@
-# 栖页 · A quiet new tab
+# Perch
 
-一个轻量、无构建依赖的 Chrome 新标签页扩展。中文界面、居中搜索框、可自定义快捷方式。
+Perch 是一个轻量、无构建依赖的 Chrome 新标签页扩展。中文界面、居中搜索框、可自定义快捷方式。
+
+源代码：[xq-meng/Perch](https://github.com/xq-meng/Perch)。
 
 ## 安装到 Chrome
 
 1. 打开 `chrome://extensions`。
 2. 开启右上角的「开发者模式」。
-3. 点击「加载已解压的扩展程序」，选择当前 `new-tab` 文件夹（包含 `manifest.json` 的这一层）。
+3. 点击「加载已解压的扩展程序」，选择项目根目录（包含 `manifest.json` 的这一层）。
 4. 打开一个新标签页。如果 Chrome 询问是否保留新标签页更改，选择保留。
 
 修改代码后，在扩展管理页点击本扩展的刷新按钮，然后重新打开新标签页。
@@ -40,7 +42,7 @@ python3 scripts/preview.py
 
 ## 打包
 
-在完整源代码目录运行 `python3 scripts/package.py`，生成 `artifacts/qipage-1.2.1.zip`。归档包含扩展运行资源、本机预览脚本和说明，不含测试及预览截图。解压到独立文件夹后，按上述步骤加载其中的扩展。
+在完整源代码目录运行 `python3 scripts/package.py`，生成 `artifacts/perch-1.2.2.zip`。归档包含扩展运行资源、本机预览脚本和说明，不含测试及预览截图。解压到独立文件夹后，按上述步骤加载其中的扩展。
 
 ## 测试
 

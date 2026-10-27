@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parent.parent
-PREFIX = "/__qipage/"
+PREFIX = "/__perch/"
 
 
 def public_url(value, homepage=False):
@@ -124,7 +124,7 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         if not local_request(self.headers, self.server.server_port):
             return self.json_response({"error": "Local same-origin requests only"}, 403)
         if path.path == PREFIX + "status":
-            return self.json_response({"service": "qipage-icon-preview", "version": 1})
+            return self.json_response({"service": "perch-icon-preview", "version": 1})
         if path.path not in (PREFIX + "metadata", PREFIX + "image"):
             return self.json_response({"error": "Not found"}, 404)
         value = parse_qs(path.query).get("url", [""])[0]
@@ -157,7 +157,7 @@ def main():
     arguments = parser.parse_args()
     handler = functools.partial(PreviewHandler, directory=str(ROOT))
     with ThreadingHTTPServer(("127.0.0.1", arguments.port), handler) as server:
-        print(f"Qipage preview: http://127.0.0.1:{arguments.port}/index.html", flush=True)
+        print(f"Perch preview: http://127.0.0.1:{arguments.port}/index.html", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

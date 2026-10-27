@@ -1,7 +1,7 @@
-import { COLORS, MAX_SHORTCUTS, defaultState, normalizeUrl, searchDestination, moveShortcut } from './lib/model.js?v=1.2.0';
-import { createStorage } from './lib/storage.js?v=1.2.0';
-import { icons } from './lib/icons.js?v=1.2.0';
-import { createWebsiteFavicons } from './lib/favicon-browser.js?v=1.2.1';
+import { COLORS, MAX_SHORTCUTS, defaultState, normalizeUrl, searchDestination, moveShortcut } from './lib/model.js?v=1.2.2';
+import { createStorage } from './lib/storage.js?v=1.2.2';
+import { icons } from './lib/icons.js?v=1.2.2';
+import { createWebsiteFavicons } from './lib/favicon-browser.js?v=1.2.2';
 
 const $ = (selector) => document.querySelector(selector);
 const storage = createStorage();

@@ -1,6 +1,6 @@
 {
-  "name": "qipage-new-tab",
-  "version": "1.2.1",
+  "name": "perch",
+  "version": "1.2.2",
   "private": true,
   "type": "module",
   "description": "A quiet, customizable Chrome new tab. No build step or runtime dependencies.",

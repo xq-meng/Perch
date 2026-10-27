@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "栖页 · A quiet new tab",
-  "version": "1.2.1",
+  "name": "Perch",
+  "version": "1.2.2",
   "description": "自定义新标签页，支持搜索和快捷方式管理。",
   "permissions": ["storage"],
   "host_permissions": ["https://*/*", "http://*/*"],

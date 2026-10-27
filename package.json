@@ -1,0 +1,11 @@
+{
+  "name": "qipage-new-tab",
+  "version": "1.2.1",
+  "private": true,
+  "type": "module",
+  "description": "A quiet, customizable Chrome new tab. No build step or runtime dependencies.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "package": "python3 scripts/package.py"
+  }
+}

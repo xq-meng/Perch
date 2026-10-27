@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f6f8fa" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none'; base-uri 'none'" />
+    <title>栖页 · 新标签页</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="128x128" href="assets/icon-128.png" />
+    <link rel="stylesheet" href="styles.css?v=1.2.1" />
+    <script type="module" src="app.js?v=1.2.1"></script>
+  </head>
+  <body>
+    <main class="main-content">
+      <form id="search-form" class="search-bar" role="search">
+        <div class="engine-picker">
+          <span id="engine-icon" aria-hidden="true"></span>
+          <label class="sr-only" for="engine-select">搜索引擎</label>
+          <select id="engine-select" name="engine">
+            <option value="google">Google</option>
+            <option value="bing">Bing</option>
+            <option value="baidu">百度</option>
+            <option value="duckduckgo">DuckDuckGo</option>
+          </select>
+          <span class="select-chevron" data-icon="chevron" aria-hidden="true"></span>
+        </div>
+        <label class="sr-only" for="search-input">搜索内容或网址</label>
+        <input id="search-input" type="text" name="q" placeholder="搜索或输入网址" autocomplete="off" spellcheck="false" maxlength="2048" />
+        <button class="search-submit" type="submit" aria-label="搜索" title="搜索"><span data-icon="arrow-right"></span></button>
+      </form>
+
+      <section class="shortcuts-section" aria-label="快捷方式">
+        <div class="section-header">
+          <div class="section-actions">
+            <button id="add-shortcut" class="text-button" type="button" aria-label="添加快捷方式" title="添加快捷方式"><span data-icon="plus"></span></button>
+            <button id="edit-toggle" class="text-button" type="button" aria-pressed="false" aria-label="整理快捷方式" title="整理快捷方式"><span id="edit-icon" data-icon="edit"></span></button>
+          </div>
+        </div>
+        <div id="shortcuts" class="shortcuts-grid"></div>
+        <p id="edit-hint" class="edit-hint" hidden>拖动图标排序，点击编辑</p>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <button id="settings-open" class="customize-button" type="button" aria-label="设置" title="设置"><span data-icon="sliders"></span></button>
+    </footer>
+
+    <dialog id="shortcut-dialog" class="modal" aria-labelledby="shortcut-dialog-title">
+      <form id="shortcut-form" class="modal-content" novalidate>
+        <div class="modal-heading"><h2 id="shortcut-dialog-title">添加快捷方式</h2><button class="icon-button" type="button" data-close="shortcut-dialog" aria-label="关闭"><span data-icon="close"></span></button></div>
+        <div id="shortcut-preview" class="shortcut-preview" aria-hidden="true"></div>
+        <label class="field-label" for="shortcut-name">名称</label>
+        <input id="shortcut-name" class="text-input" name="name" placeholder="例如：我的灵感库" maxlength="32" required autocomplete="off" />
+        <label class="field-label" for="shortcut-url">网址</label>
+        <input id="shortcut-url" class="text-input" name="url" placeholder="https://example.com" maxlength="2048" required autocomplete="off" inputmode="url" spellcheck="false" aria-describedby="shortcut-error" />
+        <fieldset class="color-field"><legend class="field-label">图标底色</legend><div id="shortcut-colors" class="color-options"></div></fieldset>
+        <div id="position-field" class="position-field" hidden><label class="field-label" for="shortcut-position">排列位置</label><select id="shortcut-position" class="text-input"></select></div>
+        <p id="shortcut-error" class="form-error" role="alert"></p>
+        <div class="modal-actions"><button id="delete-shortcut" class="danger-button" type="button" hidden><span data-icon="trash"></span>删除</button><div class="action-spacer"></div><button class="secondary-button" type="button" data-close="shortcut-dialog">取消</button><button id="save-shortcut" class="primary-button" type="submit">添加</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="settings-dialog" class="modal settings-modal" aria-labelledby="settings-title">
+      <form id="settings-form" class="modal-content">
+        <div class="modal-heading"><h2 id="settings-title">个性化设置</h2><button class="icon-button" type="button" data-close="settings-dialog" aria-label="关闭"><span data-icon="close"></span></button></div>
+        <fieldset class="theme-field"><legend class="field-label">外观</legend><div class="theme-options"><label><input type="radio" name="theme" value="light" /><span class="theme-option"><span data-icon="sun"></span>浅色</span></label><label><input type="radio" name="theme" value="dark" /><span class="theme-option"><span data-icon="moon"></span>深色</span></label><label><input type="radio" name="theme" value="system" /><span class="theme-option"><span data-icon="monitor"></span>跟随系统</span></label></div></fieldset>
+        <div class="settings-toggles"><label class="toggle-row" for="settings-new-tab"><span>在新标签页打开<span class="setting-description">搜索结果和快捷方式</span></span><input id="settings-new-tab" class="switch" type="checkbox" /></label></div>
+        <p class="privacy-note"><span data-icon="lock"></span>你的设置只保存在当前浏览器中。</p>
+        <p id="settings-error" class="form-error" role="alert"></p>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close="settings-dialog">取消</button><button class="primary-button" type="submit">保存设置</button></div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" hidden><span id="toast-text"></span><button id="toast-undo" type="button" hidden>撤销</button><button id="toast-close" class="toast-close" type="button" aria-label="关闭提示"><span data-icon="close"></span></button></div>
+    <noscript>请启用 JavaScript，以使用搜索和自定义快捷方式。</noscript>
+  </body>
+</html>
